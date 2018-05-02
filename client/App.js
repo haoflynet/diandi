@@ -6,10 +6,12 @@
 
 import {StackNavigator} from 'react-navigation';
 import { HomeScreen } from './views/home';
+import { ProfileScreen } from './views/profile';
 
 console.log(HomeScreen);
 
 export default App = StackNavigator({
   Home: {screen: HomeScreen}
+  Profile: {screen: ProfileScreen},
 });
 
