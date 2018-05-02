@@ -7,11 +7,12 @@
 import {StackNavigator} from 'react-navigation';
 import { HomeScreen } from './views/home';
 import { ProfileScreen } from './views/profile';
+import { SettingScreen } from './views/setting';
 
-console.log(HomeScreen);
 
 export default App = StackNavigator({
-  Home: {screen: HomeScreen}
+  Home: {screen: HomeScreen},
   Profile: {screen: ProfileScreen},
+  Setting: {screen: SettingScreen}
 });
 
