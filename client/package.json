@@ -9,6 +9,7 @@
   "dependencies": {
     "react": "16.3.1",
     "react-native": "0.55.3",
+    "react-native-voice": "^0.2.6",
     "react-navigation": "^1.5.11"
   },
   "devDependencies": {
