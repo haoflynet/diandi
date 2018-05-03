@@ -52,5 +52,11 @@
 			</dict>
 		</dict>
 	</dict>
+	<!-- 麦克风权限 --> 
+  	<key>NSMicrophoneUsageDescription</key>
+  	<string>Description of why you require the use of the microphone</string>
+	<!-- 语音识别权限 -->
+  	<key>NSSpeechRecognitionUsageDescription</key>
+  	<string>给我个语音识别的权限呗</string>
 </dict>
 </plist>
