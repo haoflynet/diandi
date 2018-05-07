@@ -1,8 +1,9 @@
-from handlers.hello import HelloHandler
-from handlers.user_controllers import UserHandler, UserDetailHandler
+from handlers.alarm_handlers import AlarmHandler
+from handlers.record_handlers import RecordHandler
+from handlers.voice_handlers import VoiceHandler
 
 url_patterns = [
-    (r"/hello", HelloHandler),
-    (r"/users", UserHandler),
-    (r"/users/(?P<user_id>\d+)", UserDetailHandler),
+    (r"/alarms", AlarmHandler),
+    (r"/records", RecordHandler),
+    (r"/voices/(?P<voice_id>\d*)", VoiceHandler),
 ]
