@@ -8,6 +8,8 @@ tornado = "*"
 urllib3 = "*"
 sqlalchemy = "*"
 requests = "*"
+tornado-sqlalchemy = "*"
+mysqlclient = "*"
 
 [dev-packages]
 
