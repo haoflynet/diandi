@@ -24,8 +24,9 @@ class VoiceModel(DeclarativeBase):
                                                    VoiceModel.deleted_at == None).first()
 
     @staticmethod
-    def get_list(db_session):
-        return db_session.query(VoiceModel).all()
+    def get_list(db_session, user_id):
+        return db_session.query(VoiceModel).filter(VoiceModel.user_id == user_id,
+                                                   VoiceModel.deleted_at == None).all()
 
     @staticmethod
     def store(db_session, user_id, text, result=None):

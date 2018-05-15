@@ -1,9 +1,11 @@
+from tornado import escape
+
 from handlers.base_handler import BaseHandler
 from models.voice import VoiceModel
 
 
 class VoiceHandler(BaseHandler):
-    def get(self, voice_id):
+    def get(self, voice_id=None):
         """
         /voices/{id}    获取指定语音
         :return:
@@ -12,16 +14,16 @@ class VoiceHandler(BaseHandler):
 
         try:
             voice_id = int(voice_id)
-            voice = VoiceModel.get_by_id(self.db_session, voice_id)
+            voice = VoiceModel.get_by_id(self.db_session, voice_id=voice_id, user_id=user_id)
             if voice is None:
                 self.set_status(404)
                 self.write({'code': 404, 'message': 'voice not found'})
                 return
         except ValueError:
-            voice_id = None
-            # TODO: 没有获取语音列表
+            """这儿相当于timeline"""
+            voice = VoiceModel.get_list(self.db_session, user_id)
 
-        self.write({'code': 200, 'message': '开发中'})
+        self.write({'data': VoiceModel.transform(voice)})
 
     def post(self, voice_id=None):
         """
@@ -29,9 +31,10 @@ class VoiceHandler(BaseHandler):
         :return:
         """
         user_id = 1
+        data = escape.json_decode(self.request.body)
         VoiceModel.store(self.db_session,
                          user_id = user_id,
-                         text = self.get_argument('text'))
+                         text = data['text'])
 
         # TODO: AIUI
         self.write({'code': 200})
