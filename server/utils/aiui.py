@@ -4,7 +4,7 @@ import hashlib
 import os
 import requests
 
-from aip import AipSpeech
+from settings.constants import AIUI_APP_ID, AIUI_API_KEY
 
 
 class AIUI:
@@ -32,7 +32,7 @@ class AIUI:
         print(r.json()['data'])
         return r.json()['data']['result']
 
-    def semantic(self, file):
+    def voice_semantic(self, file):
         """
         语音语义接口
         :param file:
@@ -49,6 +49,22 @@ class AIUI:
 
         r = requests.post(self.base_url + path, headers=self.generate_header(params, data), data=data)
         print(r.text)
+
+    def text_semantic(self, text):
+        """
+        文本语义接口
+        :param text:
+        :return:
+        """
+        path = '/v1/aiui/v1/text_semantic'
+        params = '{"scene":"main","userid":"user_0001"}'
+        data = 'text=' + base64.b64encode(bytes(text.encode('utf-8'))).decode('utf-8')
+
+        r = requests.post(self.base_url + path, headers=self.generate_header(params, data), data=data)
+        if r.status_code == 200 and r.json()['code'] == '00000':
+            return r.json()['data']
+        else:
+            raise Exception('api exception')
 
     def generate_header(self, params, data):
         """
@@ -70,21 +86,6 @@ class AIUI:
 
 
 if __name__ == '__main__':
-    aiui = AIUI(app_id='5aafd315', api_key='b1a60f922e714d3a97cd0d6a7427c258')
+    aiui = AIUI(app_id=AIUI_APP_ID, api_key=AIUI_API_KEY)
     # aiui.iat('16k.pcm')
-    # aiui.iat('16k.wav')
-    # aiui.iat('test1.wav')
-
-    lines = []
-    for i in range(1, 17):
-        file = '/Users/haofly/workspace/record-remind-everything/audios/' + str(i) + '.pcm'
-
-        aiui.semantic(file)
-    #     # aip.asr(file)
-    #     lines.append(aiui.iat(file) + '\n')
-    #
-    # with open('result', 'w') as fp:
-    #     print(lines)
-    #     fp.writelines(lines)
-
-        # aip.asr(str(i)+'.pcm')
+    print(aiui.text_semantic('今天星期几'))
