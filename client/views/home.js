@@ -21,7 +21,11 @@ export class HomeScreen extends Component {
   }
 
   componentDidMount() {
-    axios.get(API_VOICES).then((response) => {
+    axios.get(API_VOICES, {
+      params: {
+        type: VOICE_TYPE_RECORD
+      }
+    }).then((response) => {
       voices = response.data.data;
       this.setState({
         voices: voices,
