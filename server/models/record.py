@@ -25,7 +25,7 @@ class RecordModel(Base):
                                                     RecordModel.deleted_at == None).first()
 
     @staticmethod
-    def get_list(user_id):
+    def get_list(user_id, keyword=''):
         return db_session.query(RecordModel).filter(RecordModel.user_id == user_id,
                                                     RecordModel.deleted_at == None).all()
 

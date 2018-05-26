@@ -6,7 +6,7 @@ from tornado import escape
 from handlers.base_handler import BaseHandler
 from models.alarm import AlarmModel
 from models.record import RecordModel
-from models.voice import VoiceModel
+from models.voice import VoiceModel, VoiceTypeEnum
 from utils.aiui import AIUI, AiuiIntent
 
 
@@ -27,7 +27,9 @@ class VoiceHandler(BaseHandler):
                 return
         except ValueError:
             """这儿相当于timeline"""
-            voice = VoiceModel.get_list(user_id)
+            keyword = self.get_argument('keyword', None)
+            type = self.get_argument('type', VoiceTypeEnum.RECORD)
+            voice = VoiceModel.get_list(user_id, keyword, type)
 
         self.write({'data': VoiceModel.transform(voice)})
 

@@ -6,7 +6,7 @@ from models.voice import VoiceModel
 
 
 class RecordHandler(BaseHandler):
-    def get(self, record_id):
+    def get(self, record_id=None):
         """
         /records        获取记录列表
         /records/{id}   获取指定记录
@@ -18,11 +18,10 @@ class RecordHandler(BaseHandler):
             record_id  = int(record_id)
             record = RecordModel.get_by_id(record_id, user_id)
         except ValueError:
-            record = RecordModel.get_list(user_id)
-            keyword = self.get_argument('keywords')
-            # TODO: 提取关键字进行搜索
+            keyword = self.get_argument('keyword', '')
+            record = RecordModel.get_list(user_id, keyword)
 
-        self.write({'data': RecordModel.transform(record, user_id)})
+        self.write({'data': RecordModel.transform(record)})
 
     def put(self, record_id):
         """

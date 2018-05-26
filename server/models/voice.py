@@ -32,9 +32,15 @@ class VoiceModel(Base):
                                                    VoiceModel.deleted_at == None).first()
 
     @staticmethod
-    def get_list(user_id):
-        return db_session.query(VoiceModel).filter(VoiceModel.user_id == user_id,
-                                                   VoiceModel.deleted_at == None).all()
+    def get_list(user_id, keyword=None, type=None):
+        query = db_session.query(VoiceModel).filter(VoiceModel.user_id==user_id,
+                                                    VoiceModel.deleted_at==None)
+        if type is not None:
+            query = query.filter(VoiceModel.type==type)
+        if keyword is not None:
+            query = query.filter(VoiceModel.text.like(f'%{keyword}%'))
+
+        return query.all()
 
     @staticmethod
     def store(user_id, text, type='RECORD', result=None):
