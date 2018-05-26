@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import Voice from 'react-native-voice';
 import { View, Text, Button, Image, StyleSheet, TouchableHighlight} from 'react-native';
 import axios from 'axios';
-import { API_VOICES } from '../utils/constants/config';
+import { API_VOICES, VOICE_TYPE_RECORD, VOICE_TYPE_ALARM } from '../utils/constants/config';
 
 
 export class HomeScreen extends Component {
@@ -51,6 +51,9 @@ export class HomeScreen extends Component {
    */
   async _startRecognizing(e) {
     console.log('开始录音');
+    this.setState({
+      text: ''
+    });
 
     if (!Voice.isAvailable()	) {
       console.error('没有录音权限');
@@ -83,9 +86,26 @@ export class HomeScreen extends Component {
     console.log('添加记录');
     axios.post(API_VOICES, {
       'text': this.state.text,
+      'type': VOICE_TYPE_RECORD
     }).then((response) => {
       console.log(response.data);
     }).catch((error) => {
+      console.log(error);
+    });
+  }
+
+  /**
+   * 添加提醒
+   */
+  async _addAlarm() {
+    console.log('添加提醒');
+    axios.post(API_VOICES, {
+      'text': this.state.text,
+      'type': VOICE_TYPE_ALARM
+    }).then((response) => {
+      console.log(response.data);
+    }).catch((error) => {
+      console.log('error');
       console.log(error);
     });
   }
@@ -103,6 +123,12 @@ export class HomeScreen extends Component {
           <View>
             <Text>添加记录</Text>
 	        </View>
+        </TouchableHighlight>
+
+        <TouchableHighlight onPressIn={this._addAlarm.bind(this)}>
+          <View>
+            <Text>添加提醒</Text>
+          </View>
         </TouchableHighlight>
         
         {this.state.voices.map((voice, index) => {
