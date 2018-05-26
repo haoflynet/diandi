@@ -1,9 +1,12 @@
+import json
 import time
 import base64
 import hashlib
 import os
 import requests
 
+from models.alarm import CycleUnitEnum
+from models.entity import EntityModel, EntityTypeEnum
 from settings.constants import AIUI_APP_ID, AIUI_API_KEY
 
 
@@ -54,7 +57,15 @@ class AIUI:
         """
         文本语义接口
         :param text:
-        :return:
+        :return: json
+        rc: 应答码(response code)
+        text: 用户的输入，可能和请求中的原始text不完全一致，因服务器可能会对text进行语言纠错
+        vendor: 技能提供者名称
+        service: 技能的全局唯一名称，一般为vendor.name
+        semantic: 本次语义结构化表示
+        dialog_stat: 用于客户端判断是否用新源返回数据
+        moreResults: 在存在多个候选结果时，用于提供更多的结果描述
+        sid: 本次服务唯一标识
         """
         path = '/v1/aiui/v1/text_semantic'
         params = '{"scene":"main","userid":"user_0001"}'
@@ -62,9 +73,9 @@ class AIUI:
 
         r = requests.post(self.base_url + path, headers=self.generate_header(params, data), data=data)
         if r.status_code == 200 and r.json()['code'] == '00000':
-            return r.json()['data']
+            return r.json()['data'], r.json()['code']
         else:
-            raise Exception('api exception')
+            raise Exception(r.json()['desc'])
 
     def generate_header(self, params, data):
         """
@@ -84,8 +95,54 @@ class AIUI:
             'charset': 'utf-8'
         }
 
+    @staticmethod
+    def aiui():
+        return AIUI(app_id=AIUI_APP_ID, api_key=AIUI_API_KEY)
+
+
+class AiuiIntent:
+    """
+    不同的意图需要不同的解析方式
+    这里需要定义出提醒所需的格式
+
+    实体对应的时间应该查询entity
+    """
+
+    @staticmethod
+    def fuzzytime_content(semantic):
+        fuzzytime = want = content = None
+
+        for slot in semantic['slots']:
+            if slot['name'] == 'fuzzytime':
+                fuzzytime = slot['value']
+            elif slot['name'] == 'want':
+                want = slot['value']
+            elif slot['name'] == 'content':
+                content = slot['value']
+            else:
+                raise Exception('unhandled slot: ' + json.dumps(slot))
+
+        print(semantic)
+        assert fuzzytime
+        assert content
+
+        return {
+            'text': content,
+            'cycle_unit': CycleUnitEnum.NONE,
+            'cycle_count': 0,
+            'next_time': EntityModel.exec_by_word(fuzzytime, EntityTypeEnum.FUZZY_TIME),
+        }
+
+    @staticmethod
+    def fuzzytime_festival_content(semantic):
+        print(semantic)
+
 
 if __name__ == '__main__':
-    aiui = AIUI(app_id=AIUI_APP_ID, api_key=AIUI_API_KEY)
-    # aiui.iat('16k.pcm')
-    print(aiui.text_semantic('今天星期几'))
+    # aiui = AIUI(app_id=AIUI_APP_ID, api_key=AIUI_API_KEY)
+    # # aiui.iat('16k.pcm')
+    # result = aiui.text_semantic('等我长大了我要买车')    # 像长大了这种字眼，直接5年，也不用根据现在的年龄来看
+    # # print(result)
+    # semantic = result['semantic'][0]
+    # getattr(AiuiIntent, semantic['intent'])(semantic)
+    print(getattr(AiuiIntent, 'fuzzytime_content'))
