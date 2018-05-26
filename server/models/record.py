@@ -19,18 +19,18 @@ class RecordModel(Base):
     deleted_at  = Column(TIMESTAMP)
 
     @staticmethod
-    def get_by_id(db_session, record_id, user_id):
+    def get_by_id(record_id, user_id):
         return db_session.query(RecordModel).filter(RecordModel.id == record_id,
                                                     RecordModel.user_id == user_id,
                                                     RecordModel.deleted_at == None).first()
 
     @staticmethod
-    def get_list(db_session, user_id):
+    def get_list(user_id):
         return db_session.query(RecordModel).filter(RecordModel.user_id == user_id,
                                                     RecordModel.deleted_at == None).all()
 
     @staticmethod
-    def store(db_session, user_id, voice_id, words):
+    def store(user_id, voice_id, words):
         record = RecordModel(
             user_id = user_id,
             voice_id = voice_id,
@@ -40,12 +40,13 @@ class RecordModel(Base):
         )
         db_session.add(record)
         db_session.commit()
+        return record
 
     @staticmethod
-    def update_by_id(db_session, record_id, user_id, text=None):
+    def update_by_id(record_id, user_id, text=None):
         # TODO: 可以单独添加修正表
-        record = RecordModel.get_by_id(db_session, record_id=record_id, user_id=user_id)
-        voice = VoiceModel.get_by_id(db_session, voice_id=record.voice_id, user_id=user_id)
+        record = RecordModel.get_by_id(record_id=record_id, user_id=user_id)
+        voice = VoiceModel.get_by_id(voice_id=record.voice_id, user_id=user_id)
 
         if text is not None:
             voice.text = text
@@ -56,11 +57,11 @@ class RecordModel(Base):
         db_session.commit()
 
     @staticmethod
-    def transform(record, db_session, user_id):
+    def transform(record):
         items = record if isinstance(record, list) else [record]
         results = []
         for item in items:
-            voice = VoiceModel.get_by_id(db_session=db_session, voice_id=item.voice_id, user_id=user_id)
+            voice = VoiceModel.get_by_id(voice_id=item.voice_id, user_id=item.user_id)
 
             results.append({
                 'id': item.id,
@@ -73,7 +74,7 @@ class RecordModel(Base):
         return results if isinstance(record, list) else results[0]
 
     @staticmethod
-    def delete_by_id(db_session, record_id, user_id):
-        voice = RecordModel.get_by_id(db_session, record_id=record_id, user_id=user_id)
+    def delete_by_id(record_id, user_id):
+        voice = RecordModel.get_by_id(record_id=record_id, user_id=user_id)
         voice.deleted_at = str(datetime.datetime.today())
         db_session.commit()

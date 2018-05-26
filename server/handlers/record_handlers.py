@@ -1,6 +1,8 @@
+from tornado import escape
+
 from handlers.base_handler import BaseHandler
-# from models import RecordModel
 from models.record import RecordModel
+from models.voice import VoiceModel
 
 
 class RecordHandler(BaseHandler):
@@ -14,13 +16,13 @@ class RecordHandler(BaseHandler):
 
         try:
             record_id  = int(record_id)
-            record = RecordModel.get_by_id(self.db_session, record_id, user_id)
+            record = RecordModel.get_by_id(record_id, user_id)
         except ValueError:
-            record = RecordModel.get_list(self.db_session, user_id)
+            record = RecordModel.get_list(user_id)
             keyword = self.get_argument('keywords')
             # TODO: 提取关键字进行搜索
 
-        self.write({'data': RecordModel.transform(record, self.db_session, user_id)})
+        self.write({'data': RecordModel.transform(record, user_id)})
 
     def put(self, record_id):
         """
@@ -30,7 +32,6 @@ class RecordHandler(BaseHandler):
         user_id = 1
         record_id = int(record_id)
         RecordModel.update_by_id(
-            self.db_session,
             record_id=record_id,
             user_id=user_id,
             text=self.get_argument('text')
@@ -44,4 +45,4 @@ class RecordHandler(BaseHandler):
         """
         user_id = 1
         record_id = int(record_id)
-        RecordModel.delete_by_id(self.db_session, record_id=record_id, user_id=user_id)
+        RecordModel.delete_by_id(record_id=record_id, user_id=user_id)

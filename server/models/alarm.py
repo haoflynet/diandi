@@ -54,16 +54,16 @@ class AlarmModel(Base):
         db_session.commit()
 
     @staticmethod
-    def get_list(db_session, user_id):
+    def get_list(user_id):
         return db_session.query(AlarmModel).filter(AlarmModel.user_id==user_id,
                                                    AlarmModel.deleted_at == None).all()
 
     @staticmethod
-    def store(db_session, user_id, cycle_unit, cycle_count, next_time, voice_id=0):
+    def store(user_id, cycle_unit, cycle_count, next_time, voice_id=0):
         alarm = AlarmModel(
             user_id = user_id,
             voice_id = voice_id,
-            cycle_unit = CycleUnitEnum[cycle_unit],
+            cycle_unit = cycle_unit,
             cycle_count = cycle_count,
             next_time = next_time,
             created_at = str(datetime.datetime.today()),
@@ -71,6 +71,7 @@ class AlarmModel(Base):
         )
         db_session.add(alarm)
         db_session.commit()
+        return alarm
 
     @staticmethod
     def transform(alarm):

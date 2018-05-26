@@ -13,14 +13,14 @@ class AlarmHandler(BaseHandler):
 
         try:
             alarm_id = int(alarm_id)
-            alarm = AlarmModel.get_by_id(self.db_session, alarm_id, user_id)
+            alarm = AlarmModel.get_by_id(alarm_id, user_id)
             if alarm is None:
                 self.set_status(404)
                 self.write({'code': 404, 'message': 'alarm not found'})
                 return
         except ValueError:
             # TODO: 这里的user_id来自于query
-            alarm = AlarmModel.get_list(self.db_session, user_id)
+            alarm = AlarmModel.get_list(user_id)
 
         self.write({'data':AlarmModel.transform(alarm)})
 
@@ -29,8 +29,7 @@ class AlarmHandler(BaseHandler):
         /alarms 直接创建提醒
         :return:
         """
-        AlarmModel.store(self.db_session,
-                         user_id = 1,
+        AlarmModel.store(user_id = 1,
                          cycle_unit = self.get_argument('cycle_unit', 'NONE'),
                          cycle_count = self.get_argument('cycle_count', 0),
                          next_time = self.get_argument('next_time')
@@ -45,8 +44,7 @@ class AlarmHandler(BaseHandler):
         """
         user_id = 1
         alarm_id = int(alarm_id)
-        AlarmModel.update_by_id(self.db_session,
-                         user_id = 1,
+        AlarmModel.update_by_id(user_id = 1,
                          alarm_id = alarm_id,
                          cycle_unit = self.get_argument('cycle_unit', 'NONE'),
                          cycle_count = self.get_argument('cycle_count', 0),
@@ -62,8 +60,7 @@ class AlarmHandler(BaseHandler):
         """
         user_id = 1
         alarm_id = int(alarm_id)
-        AlarmModel.update_by_id(self.db_session,
-                                user_id = 1,
+        AlarmModel.update_by_id(user_id = 1,
                                 alarm_id = alarm_id,
                                 expired = self.get_argument('expired', None))
         self.write({'code': 200})
@@ -75,4 +72,4 @@ class AlarmHandler(BaseHandler):
         """
         user_id = 1
         alarm_id = int(alarm_id)
-        AlarmModel.delete_by_id(self.db_session, alarm_id, user_id)
+        AlarmModel.delete_by_id(alarm_id, user_id)
