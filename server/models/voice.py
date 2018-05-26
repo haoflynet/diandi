@@ -1,12 +1,17 @@
 import datetime
+import enum
 
-from sqlalchemy import Column, Integer, TIMESTAMP, Text, VARCHAR
-from tornado_sqlalchemy import declarative_base
+from sqlalchemy import Column, Integer, TIMESTAMP, Text, VARCHAR, Enum
 
-DeclarativeBase = declarative_base()
+from db import Base, db_session
 
 
-class VoiceModel(DeclarativeBase):
+class VoiceTypeEnum(enum.Enum):
+    RECORD = 0
+    ALARM = 1
+
+
+class VoiceModel(Base):
     __tablename__ = 'voices'
 
     id = Column(Integer, primary_key=True)

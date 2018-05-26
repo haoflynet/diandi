@@ -1,16 +1,13 @@
 import datetime
-import json
 
 from sqlalchemy import Column, Integer, TIMESTAMP, Text
-from tornado_sqlalchemy import declarative_base
 
-# from . import VoiceModel
+from db import Base, db_session
 from models.voice import VoiceModel
 
-DeclarativeBase = declarative_base()
 
 
-class RecordModel(DeclarativeBase):
+class RecordModel(Base):
     __tablename__ = 'records'
 
     id          = Column(Integer, primary_key=True)

@@ -2,9 +2,8 @@ import datetime
 import enum
 
 from sqlalchemy import Column, Integer, Enum, Boolean, TIMESTAMP
-from tornado_sqlalchemy import declarative_base
 
-DeclarativeBase = declarative_base()
+from db import Base, db_session
 
 
 class CycleUnitEnum(enum.Enum):
@@ -16,7 +15,7 @@ class CycleUnitEnum(enum.Enum):
     YEAR = 5
 
 
-class AlarmModel(DeclarativeBase):
+class AlarmModel(Base):
     __tablename__ = 'alarms'
 
     id = Column(Integer, primary_key=True)
@@ -31,20 +30,20 @@ class AlarmModel(DeclarativeBase):
     deleted_at  = Column(TIMESTAMP)
 
     @staticmethod
-    def get_by_id(db_session, alarm_id, user_id):
+    def get_by_id(alarm_id, user_id):
         return db_session.query(AlarmModel).filter(AlarmModel.id == alarm_id,
                                                    AlarmModel.user_id == user_id,
                                                    AlarmModel.deleted_at == None).first()
 
     @staticmethod
-    def delete_by_id(db_session, alarm_id, user_id):
-        alarm = AlarmModel.get_by_id(db_session, alarm_id=alarm_id, user_id=user_id)
+    def delete_by_id(alarm_id, user_id):
+        alarm = AlarmModel.get_by_id(alarm_id=alarm_id, user_id=user_id)
         alarm.deleted_at = str(datetime.datetime.today())
         db_session.commit()
 
     @staticmethod
-    def update_by_id(db_session, alarm_id, user_id, cycle_unit=None, cycle_count=None, next_time=None, expired=None):
-        alarm = AlarmModel.get_by_id(db_session, alarm_id, user_id)
+    def update_by_id(alarm_id, user_id, cycle_unit=None, cycle_count=None, next_time=None, expired=None):
+        alarm = AlarmModel.get_by_id(alarm_id, user_id)
         alarm.cycle_unit = cycle_unit if cycle_unit is not None else alarm.cycle_unit
         alarm.cycle_count = cycle_count if cycle_count is not None else alarm.cycle_count
         alarm.next_time = next_time if next_time is not None else alarm.next_time
