@@ -39,10 +39,9 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
-	<key>NSAppTransportSecurity</key>
-	<!--See http://ste.vn/2015/06/10/configuring-app-transport-security-ios-9-osx-10-11/ -->
+	<string/>
 	<!-- TODO: delete-->
+	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
@@ -54,10 +53,24 @@
 		</dict>
 	</dict>
 	<!-- 麦克风权限 --> 
-  	<key>NSMicrophoneUsageDescription</key>
-  	<string>Description of why you require the use of the microphone</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Description of why you require the use of the microphone</string>
 	<!-- 语音识别权限 -->
-  	<key>NSSpeechRecognitionUsageDescription</key>
-  	<string>给我个语音识别的权限呗</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>给我个语音识别的权限呗</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Entypo.ttf</string>
+		<string>EvilIcons.ttf</string>
+		<string>Feather.ttf</string>
+		<string>FontAwesome.ttf</string>
+		<string>Foundation.ttf</string>
+		<string>Ionicons.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+		<string>MaterialIcons.ttf</string>
+		<string>Octicons.ttf</string>
+		<string>SimpleLineIcons.ttf</string>
+		<string>Zocial.ttf</string>
+	</array>
 </dict>
 </plist>
