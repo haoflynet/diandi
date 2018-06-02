@@ -3,7 +3,7 @@
  */
 import React, { Component } from 'react';
 import Voice from 'react-native-voice';
-import { View, Text, Button, Image, StyleSheet, TouchableHighlight, TextInput, RefreshControl} from 'react-native';
+import { View, Text, Button, Image, StyleSheet, TouchableHighlight, TextInput, RefreshControl, ScrollView} from 'react-native';
 import axios from 'axios';
 import { API_VOICES, VOICE_TYPE_RECORD, VOICE_TYPE_ALARM } from '../utils/constants/config';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -13,44 +13,41 @@ export class HomeScreen extends Component {
   static navigationOptions = ({navigation}) => ({
     title: '点点记录',
     headerLeft: (<Icon name="user" size={24} color="#007AFF" onPress={() => navigation.navigate('Profile')} style={{marginLeft: 10}} />),
-    headerRight: (<Icon name="calendar-o" size={24} color="#007AFF" onPress={() => navigation.navigate('Setting')} value="10" style={{marginRight: 10}} />),
+    headerRight: (<Icon name="calendar-o" size={24} color="#007AFF" onPress={() => navigation.navigate('Calendar')} value="10" style={{marginRight: 10}} />),
   });
 
   constructor(props) {
     super(props);
+
     this.state = {
       voices: [],
       text: '点击可直接输入',
+      text_color: 'gray',
     }
 
     this.data = [
       {
         title: '我要成为一个很厉害的人', 
-        lineColor:'#009688', 
-        icon: require('../img/archery.png'),
-        imageUrl: 'https://cloud.githubusercontent.com/assets/21040043/24240340/c0f96b3a-0fe3-11e7-8964-fe66e4d9be7a.jpg'
+        icon: require('../img/record.png'),
       },
       {
         title: '下个月一定要完成这个项目', 
-        icon: require('../img/badminton.png'),
-        imageUrl: 'https://cloud.githubusercontent.com/assets/21040043/24240405/0ba41234-0fe4-11e7-919b-c3f88ced349c.jpg'
+        icon: require('../img/alarm.png'),
       },
       {
         title: '明天八点起床', 
-        icon: require('../img/lunch.png'),
+        icon: require('../img/fuzzy_alarm.png'),
       },
       {
         title: 'Watch Soccer', 
-        lineColor:'#009688', 
-        icon: require('../img/soccer.png'),
-        imageUrl: 'https://cloud.githubusercontent.com/assets/21040043/24240419/1f553dee-0fe4-11e7-8638-6025682232b1.jpg'
+        icon: require('../img/record.png'),
       },
       {
         title: 'Go to Fitness center', 
-        icon: require('../img/dumbbell.png'),
-        imageUrl: 'https://cloud.githubusercontent.com/assets/21040043/24240422/20d84f6c-0fe4-11e7-8f1d-9dbc594d0cfa.jpg'
+        icon: require('../img/start.png'),
       }
-    ]
+    ];
+
 
     Voice.onSpeechPartialResults = this._onSpeechPartialResults.bind(this);
     Voice.onSpeechResults = this._onSpeechResults.bind(this);
@@ -92,7 +89,8 @@ export class HomeScreen extends Component {
   async _startRecognizing(e) {
     console.log('开始录音');
     this.setState({
-      text: ''
+      text: '',
+      text_color: 'black',
     });
 
     if (!Voice.isAvailable()	) {
@@ -152,23 +150,82 @@ export class HomeScreen extends Component {
 
   render() {
     return (
-      <View>
+      <ScrollView style={{flex:1}}>
+        <View>
+          <TextInput
+            style={{
+              height: 40, 
+              alignSelf: 'center',
+              alignItems: 'center',
+            }}
+            onChangeText={(text) => this.setState({text})}
+            value={this.state.text}
+            color={this.state.text_color}
+          />
+        </View>
+
+        <View style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}>
+          <TouchableHighlight style={{
+            position: 'absolute',
+            zIndex: 100,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }} onPressIn={this._startRecognizing.bind(this)} onPressOut={this._stopRecognizing.bind(this)}>
+            <Icon name="microphone" size={70} color="black"
+              style={{
+                color: "#99A7F2",
+                position: 'absolute',
+                zIndex: 1,
+            }} />
+          </TouchableHighlight>
+
+
+          <TouchableHighlight onPressIn={this._startRecognizing.bind(this)} onPressOut={this._stopRecognizing.bind(this)}>
+            <Image
+              style={{
+                width: 250, 
+                height: 250,
+                alignItems: 'center',
+                justifyContent:'center',
+              }}
+              source={require('../img/ball.png')}
+            />
+          </TouchableHighlight>
+        </View>
+
+        <View style={{
+          flex: 1
+        }}>
+          <Timeline 
+            style={styles.list}
+            data={this.data}
+            circleSize={20}
+            circleColor='rgba(0,0,0,0)'
+            lineColor='rgb(45,156,219)'
+            timeContainerStyle={{minWidth:52, marginTop: -5}}
+            timeStyle={{textAlign: 'center', color:'white', padding:5, borderRadius:13}}
+            descriptionStyle={{color:'gray'}}
+            options={{
+              style:{paddingTop:5}
+            }}
+            innerCircle={'icon'}
+            onEventPress={this.onEventPress}                    
+            separator={false}
+            detailContainerStyle={{marginBottom: 20, paddingLeft: 5, paddingRight: 5, backgroundColor: "#BBDAFF", borderRadius: 10}}
+            columnFormat='two-column'
+        />
+        </View>
+
         <TouchableHighlight onPressIn={this._startRecognizing.bind(this)} onPressOut={this._stopRecognizing.bind(this)}>
-          <View>
-            <Text>开始录音</Text>
-	        </View>
-        </TouchableHighlight>
-
-        <TouchableHighlight onPressIn={this._addRecord.bind(this)}>
-          <View>
-            <Text>添加记录</Text>
-	        </View>
-        </TouchableHighlight>
-
-        <TouchableHighlight onPressIn={this._addAlarm.bind(this)}>
-          <View>
-            <Text>添加提醒</Text>
-          </View>
+        <Icon name="microphone" size={70} color="black" onPress={this._startRecognizing.bind(this)}
+              style={{
+                color: "black",
+                position: 'absolute',
+                zIndex: 1,
+          }} />
         </TouchableHighlight>
         
         {this.state.voices.map((voice, index) => {
@@ -179,7 +236,37 @@ export class HomeScreen extends Component {
             </Text>
           )
         })}      
-      </View>
+      </ScrollView>
     );
   };
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+	paddingTop:65,
+    backgroundColor:'white'
+  },
+  list: {
+    flex: 1,
+    marginTop:20,
+  },
+  title:{
+    fontSize:16,
+    fontWeight: 'bold'
+  },
+  descriptionContainer:{
+    flexDirection: 'row',
+    paddingRight: 50
+  },
+  image:{
+    width: 50,
+    height: 50,
+    borderRadius: 25
+  },
+  textDescription: {
+    marginLeft: 10,
+    color: 'gray'
+  }
+});
