@@ -9,23 +9,12 @@ import { API_VOICES, VOICE_TYPE_RECORD, VOICE_TYPE_ALARM } from '../utils/consta
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Timeline from 'react-native-timeline-listview';
 
-
 export class HomeScreen extends Component {
-  static navigationOptions = {
+  static navigationOptions = ({navigation}) => ({
     title: '点点记录',
-    headerLeft: (
-      <Button 
-        onPress={() => alert('个人中心暂未开放')}
-        title="个人"
-      />
-    ),
-    headerRight: (
-      <Button
-        onPress={() => alert('日历系统暂未开放')}
-        title="日历"
-      />
-    ),
-  };
+    headerLeft: (<Icon name="user" size={24} color="#007AFF" onPress={() => navigation.navigate('Profile')} style={{marginLeft: 10}} />),
+    headerRight: (<Icon name="calendar-o" size={24} color="#007AFF" onPress={() => navigation.navigate('Setting')} value="10" style={{marginRight: 10}} />),
+  });
 
   constructor(props) {
     super(props);
