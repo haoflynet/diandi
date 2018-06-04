@@ -7,8 +7,8 @@ from db import Base, db_session
 
 
 class VoiceTypeEnum(enum.Enum):
-    RECORD = 0
-    ALARM = 1
+    ALARM = 0
+    RECORD = 1
 
 
 class VoiceModel(Base):
@@ -80,7 +80,7 @@ class VoiceModel(Base):
             'id': item.id,
             'user_id': item.user_id,
             'text': item.text,
-            'type': item.type.value,
+            'type': item.type.name,
             'result': item.result,
             'correct_text': item.correct_text,
             'created_at': str(item.created_at),
