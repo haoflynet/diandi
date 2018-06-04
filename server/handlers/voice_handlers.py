@@ -17,6 +17,8 @@ class VoiceHandler(BaseHandler):
         :return:
         """
         user_id = 1
+        voice = []
+        paginator = {}
 
         try:
             voice_id = int(voice_id)
@@ -29,9 +31,14 @@ class VoiceHandler(BaseHandler):
             """这儿相当于timeline"""
             keyword = self.get_argument('keyword', None)
             type = self.get_argument('type', VoiceTypeEnum.RECORD)
-            voice = VoiceModel.get_list(user_id, keyword, type)
+            page = self.get_argument('page', 1)
+            limit = self.get_argument('limit', 20)
+            voice, paginator = VoiceModel.get_list(user_id, keyword, type, page, limit)
 
-        self.write({'data': VoiceModel.transform(voice)})
+        self.write({
+            'data': VoiceModel.transform(voice),
+            'paginator': paginator,
+        })
 
     def post(self, voice_id=None):
         """
