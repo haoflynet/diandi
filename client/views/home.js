@@ -11,6 +11,8 @@ import Timeline from 'react-native-timeline-listview';
 import Dimensions from 'Dimensions';
 import RadialMenu from 'react-native-radial-menu';
 import { Button } from 'react-native-elements';
+import Toast from 'teaset/components/Toast/Toast';
+
 
 const imgSource = require('../img/record.png');
 const startImg = require('../img/start.png');
@@ -61,6 +63,7 @@ export class HomeScreen extends Component {
       anim: [],               // 点，只初始化一次
       cancelAnimated: false,  // 是否取消动画
       animatedFun: null,      // 动画函数，用于开始与停止动画
+      inputManual: false,     // 是否手动输入
     }
     // 初始化circle
     let rippleArr = [];
@@ -149,7 +152,7 @@ export class HomeScreen extends Component {
     this.state.imageComponent.measure( (fx, fy, width, height, left, top) => {
       this.setState({
         menuOpacity: 100,
-        text: '',
+        text: this.state.inputManual ? this.state.text : '',
         scrollEnabled: false,
         initialDiameter: 230,
         endDiameter: Dimensions.get('window').width,
@@ -191,13 +194,28 @@ export class HomeScreen extends Component {
    */
   async _addRecord() {
     console.log('添加记录');
+    if (this.state.text.length < 5) {
+      Toast.fail('您输入的内容过短');
+      return ;
+    }
+
     axios.post(API_VOICES, {
       'text': this.state.text,
       'type': VOICE_TYPE_RECORD
     }).then((response) => {
-      console.log(response.data);
+      Toast.success('添加成功');
+      datas = this.state.datas;
+      datas.unshift({
+          title: this.state.text,
+          icon: imgSource,
+      });
+      this.setState({
+        datas: datas,
+        text: '',
+      });
     }).catch((error) => {
       console.log(error);
+      Toast.fail('添加失败');
     });
   }
 
@@ -270,6 +288,7 @@ export class HomeScreen extends Component {
               alignItems: 'center',
             }}
             placeholder='点击可直接输入'
+            onChangeText={(text) => this.setState({text: text, inputManual: true})}
             value={this.state.text}
           />
         </View>
