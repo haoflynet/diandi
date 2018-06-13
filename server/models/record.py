@@ -27,7 +27,7 @@ class RecordModel(Base):
     @staticmethod
     def get_list(user_id, keyword=''):
         return db_session.query(RecordModel).filter(RecordModel.user_id == user_id,
-                                                    RecordModel.deleted_at == None).all()
+                                                    RecordModel.deleted_at == None).order_by('created_at').all()
 
     @staticmethod
     def store(user_id, voice_id, words):

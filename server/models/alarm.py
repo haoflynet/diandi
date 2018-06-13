@@ -56,7 +56,7 @@ class AlarmModel(Base):
     @staticmethod
     def get_list(user_id):
         return db_session.query(AlarmModel).filter(AlarmModel.user_id==user_id,
-                                                   AlarmModel.deleted_at == None).all()
+                                                   AlarmModel.deleted_at == None).order_by('created_at').all()
 
     @staticmethod
     def store(user_id, cycle_unit, cycle_count, next_time, voice_id=0):

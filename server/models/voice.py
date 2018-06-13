@@ -44,7 +44,7 @@ class VoiceModel(Base):
             'per_page': limit,
             'current_page': page,
         }
-        return query.limit(limit).offset(limit * (page - 1)).all(), paginator
+        return query.order_by('created_at').limit(limit).offset(limit * (page - 1)).all(), paginator
 
     @staticmethod
     def store(user_id, text, type='RECORD', result=None):
