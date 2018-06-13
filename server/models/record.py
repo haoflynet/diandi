@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, TIMESTAMP, Text
+from sqlalchemy import Column, Integer, TIMESTAMP, Text, desc
 
 from db import Base, db_session
 from models.voice import VoiceModel
@@ -27,7 +27,7 @@ class RecordModel(Base):
     @staticmethod
     def get_list(user_id, keyword=''):
         return db_session.query(RecordModel).filter(RecordModel.user_id == user_id,
-                                                    RecordModel.deleted_at == None).order_by('created_at').all()
+                                                    RecordModel.deleted_at == None).order_by(desc('created_at')).all()
 
     @staticmethod
     def store(user_id, voice_id, words):
