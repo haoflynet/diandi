@@ -1,15 +1,19 @@
 /**
- * 首页
+ * home page
  */
 import React, { Component } from 'react';
 import Voice from 'react-native-voice';
-import { View, Text, Button, Image, StyleSheet, TouchableHighlight, TouchableWithoutFeedback, TextInput, RefreshControl, ScrollView, Animated} from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableHighlight, TouchableWithoutFeedback, TextInput, RefreshControl, ScrollView, Animated} from 'react-native';
 import axios from 'axios';
 import { API_VOICES, VOICE_TYPE_RECORD, VOICE_TYPE_ALARM, VOICE_TYPE_IMG } from '../utils/constants/config';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Timeline from 'react-native-timeline-listview';
-const imgSource = require('../img/record.png');
 import Dimensions from 'Dimensions';
+import RadialMenu from 'react-native-radial-menu';
+import { Button } from 'react-native-elements';
+
+const imgSource = require('../img/record.png');
+const startImg = require('../img/start.png');
 
 
 export class HomeScreen extends Component {
@@ -19,24 +23,17 @@ export class HomeScreen extends Component {
       title: '点滴记录',
       headerLeft: (<Icon name="user" size={24} color="#007AFF" onPress={() => navigation.navigate('Profile')} style={{left: 10}} />),
       headerRight: (
-        <View style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-          <Text onPress={() => navigation.navigate('Calendar')} style={{
+        <View style={styles.centerContainer}>
+          <Text onPress={() => navigation.navigate('Calendar')} style={[styles.centerContainer, {
                 position: 'absolute',
                 zIndex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
                 top: 7,
                 right: day > 9 ? 14 : 17,
                 color: '#007AFF'
-          }}>{day}</Text>
-          <Icon name="calendar-o" size={24} color="#007AFF" onPress={() => navigation.navigate('Calendar')} value="10" style={{
+          }]}>{day}</Text>
+          <Icon name="calendar-o" size={24} color="#007AFF" onPress={() => navigation.navigate('Calendar')} value="10" style={[styles.centerContainer, {
             right: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }} 
+          }]} 
           />
         </View>),
     }
@@ -45,98 +42,36 @@ export class HomeScreen extends Component {
   constructor(prop) {
     super(prop);
 
-
     this.state = {
-      voices: [],
+      // other
       text: '',
-      date: (new Date()).getDate(),
+      imageComponent: null,
+      menuOpacity: 0,   // 菜单透明度
+      scrollEnabled: true,  // 是否允许滚动
+      // for timeline
+      voices: [],
       datas: [],
-
-      myComponent: null,
-
-      circle: {
-        ripple:3,       //同时存在的圆数量
-        initialDiameter:200,    // 初始直径(最小那个圆的额直径)
-        endDiameter:375,        // 最大圆的直径.TODO: 考虑是否要根据屏幕的最大宽度来改变
-        initialPosition:{top:125,left:187.5}, // 这是圆的定位，动态调，这个时候并不能获取图片的地址。left是圆心，top是最上面的边，我去。。。
-        rippleColor:'#5BC6AD',
-        intervals:500,      //间隔时间
-        spreadSpeed:2000,      //扩散速度
-        component: null,
-
-        anim: [],
-        cancelAnimated: false,
-        animatedFun: null,
-      }
+      //for circle
+      ripple:3,               // 同时存在的圆数量
+      initialDiameter:0,      // 初始直径为0的时候才不会在初始化时被看到(最小那个圆的直径，图片固定250，这里固定230)
+      endDiameter:375,        // 最大圆的直径，屏幕的宽度
+      initialPosition:{top:125,left:187.5}, // 圆的定位(left是圆心，top是最上面的边)
+      intervals: 500,         // 间隔时间
+      spreadSpeed:2000,      //扩散速度
+      anim: [],               // 点，只初始化一次
+      cancelAnimated: false,  // 是否取消动画
+      animatedFun: null,      // 动画函数，用于开始与停止动画
     }
-
-    
-    
+    // 初始化circle
     let rippleArr = [];
-    for(let i=0;i<this.state.circle.ripple;i++) rippleArr.push(0);
-    this.state.circle.anim = rippleArr.map(()=> new Animated.Value(0));
-    
-
-
-    Voice.onSpeechPartialResults = this._onSpeechPartialResults.bind(this);
-    Voice.onSpeechResults = this._onSpeechResults.bind(this);
-    
-    // this.startAnimation();
-    this.locateCircle.bind(this)
-  }
-
-  locateCircle() {
-    console.log('定位');
-
-    this.state.myComponent.measure( (fx, fy, width, height, left, top) => {
-    //   let rippleArr = [];
-    // for(let i=0;i<this.state.circle.ripple;i++) rippleArr.push(0);
-
-
-    // this.state.circle.anim = rippleArr.map(()=> new Animated.Value(0));
-
-
-
-
-      this.state.circle.initialPosition = {
-        // top: top + height / 2 - (this.state.circle.endDiameter-this.state.circle.initialDiameter) / 2,
-        top: 124,
-        left: left + width / 2
-      };
-    // let rippleArr = [];
-    // for(let i=0;i<this.state.circle.ripple;i++) rippleArr.push(0);
-    // this.state.circle.anim = rippleArr.map(()=> new Animated.Value(0));
-
-      
-      console.log(this.state.circle.initialPosition);
-
-      console.log('Component width is: ' + width)
-      console.log('Component height is: ' + height)
-      console.log('X offset to frame: ' + fx)
-      console.log('Y offset to frame: ' + fy)
-      console.log('X offset to page: ' + left)
-      console.log('Y offset to page: ' + top)
-  });  
-}
-
-  startAnimation(){
-    this.state.circle.anim.map((val,index)=>val.setValue(0));
-    this.state.circle.animatedFun = Animated.stagger(this.state.circle.intervals,this.state.circle.anim.map((val)=>{
-      return Animated.timing(val,{toValue:1,duration:this.state.circle.spreadSpeed})
-    }));
-    this.state.circle.cancelAnimated = false;
-    this.state.circle.animatedFun.start(()=>{if(!this.state.circle.cancelAnimated) {this.startAnimation()}});
-  }
-
-  stopAnimation(){
-    this.state.circle.cancelAnimated = true;
-    this.state.circle.animatedFun.stop();
-    this.state.circle.anim.map((val,index)=>val.setValue(0));
+    for(let i=0;i<this.state.ripple;i++) rippleArr.push(0);
+    this.state.anim = rippleArr.map(()=> new Animated.Value(0));
+    // bind this
+    Voice.onSpeechPartialResults = this.onSpeechPartialResults.bind(this);
+    Voice.onSpeechResults = this.onSpeechResults.bind(this);
   }
 
   componentDidMount() {
-
-
     axios.get(API_VOICES, {
       params: {
         type: VOICE_TYPE_RECORD
@@ -153,49 +88,78 @@ export class HomeScreen extends Component {
       if (response.data.paginator && voices.length < response.data.paginator.per_page) {
         datas.push({
           title: '',
-          icon: require('../img/start.png'),
+          icon: startImg,
         });
       }
 
       this.setState({
+        voices: voices,
         datas: datas,
       });
+      console.log('home.componentDidMount ok');
     }).catch((error) => {
       console.log('error in home.componentDidMount');
       console.log(error);
     });
   }
 
-  _onSpeechPartialResults(e) {
-    console.log('onSpeechPartialResults');
-    this.setState({
-      text: e.value[0],
-    });
-    console.log(e.value);
-  }
-
-  _onSpeechResults(e) {
-    console.log('onSpeechResults');
-    console.log(e.value);
+  /**
+   * 开始circle动画
+   */
+  startAnimation(){
+    this.state.anim.map((val,index)=>val.setValue(0));
+    this.state.animatedFun = Animated.stagger(this.state.intervals,this.state.anim.map((val)=>{
+      return Animated.timing(val,{toValue:1,duration:this.state.spreadSpeed})
+    }));
+    this.state.cancelAnimated = false;
+    this.state.animatedFun.start(()=>{if(!this.state.cancelAnimated) {this.startAnimation()}});
   }
 
   /**
-   * 按钮按下开始录音
-   * @param {*} e 
+   * 停止circle动画
    */
-  async _startRecognizing(e) {
-    console.log('开始录音');
+  stopAnimation(){
+    this.state.cancelAnimated = true;
+    this.state.animatedFun.stop();
+    this.state.anim.map((val,index)=>val.setValue(0));
+  }
 
-    this.locateCircle();
-    this.startAnimation();
-
+  onSpeechPartialResults(e) {
+    console.log('onSpeechPartialResults');
+    console.log(e.value);
     this.setState({
-      text: '',
+      text: e.value[0],
     });
+  }
 
+  onSpeechResults(e) {
+    console.log('onSpeechResults: no action');
+  }
+
+  /**
+   * 主屏幕按钮按下: 开始录音、显示菜单、禁止滚动
+   */
+  async startRecognizing(e) {
+    console.log('startRecognizing');
     if (!Voice.isAvailable()	) {
       console.error('没有录音权限');
     }
+
+    // locate circle
+    this.state.imageComponent.measure( (fx, fy, width, height, left, top) => {
+      this.setState({
+        menuOpacity: 100,
+        text: '',
+        scrollEnabled: false,
+        initialDiameter: 230,
+        endDiameter: Dimensions.get('window').width,
+        initialPosition: {
+          top: 125,    // 图片直径/2
+          left: left + width / 2,
+        }
+      });
+    });  
+    this.startAnimation();
 
     try {
       await Voice.start('zh-Hans');
@@ -205,13 +169,16 @@ export class HomeScreen extends Component {
   }
 
   /**
-   * 按钮松开结束录音
-   * @param {*} e 
+   * 结束录音
    */
-  async _stopRecognizing(e) {
+  async stopRecognizing(e) {
+    console.log('stopRecognizing');
     this.stopAnimation();
+    this.setState({      
+      menuOpacity: 0,
+      scrollEnabled: true
+    });
     
-    console.log('结束录音');
     try {
       await Voice.stop();
     } catch (e) {
@@ -250,54 +217,50 @@ export class HomeScreen extends Component {
     });
   }
 
-  _onPre() {
-    console.log('ok');
+  onSelectMenu(name) {
+    console.log('select' + name);
+    if (name == '搜索记录') {
+      this.props.navigation.push('Calendar');
+    } else if (name == '日常记录') {
+      this._addRecord();
+    } else if (name == '添加提醒') {
+      this._addAlarm;
+    }
   }
 
   render() {
-  
-    console.log(this.state);
-        let r = this.state.circle.endDiameter-this.state.circle.initialDiameter;    // 直径变化量,top与left的变化是直径的一半
+    let r = this.state.endDiameter-this.state.initialDiameter;    // 直径变化量,top与left的变化是直径的一半
+    let rippleComponent = this.state.anim.map((val,index)=>{
+      return (
+        <Animated.View key={"animatedView_"+index} style={[styles.spreadCircle,{backgroundColor:'#5BC6AD'},{
+          opacity:val.interpolate({
+                      inputRange:[0,1],
+                      outputRange:[1,0]
+                  }),
+          height:val.interpolate({
+                      inputRange:[0,1],
+                      outputRange:[this.state.initialDiameter,this.state.endDiameter]
+                  }),
+          width:val.interpolate({
+                      inputRange:[0,1],
+                      outputRange:[this.state.initialDiameter,this.state.endDiameter]
+                  }),
+          top:val.interpolate({
+                      inputRange:[0,1],
+                      outputRange:[this.state.initialPosition.top - this.state.initialDiameter/2,this.state.initialPosition.top - this.state.initialDiameter/2 - r/2]
+                  }),
+          left:val.interpolate({
+                      inputRange:[0,1],
+                      outputRange:[this.state.initialPosition.left - this.state.initialDiameter/2,this.state.initialPosition.left - this.state.initialDiameter/2 - r/2]
+                  }),
+          }]}>
+        </Animated.View>
+      )
+    });
 
-        // console.log('render');
-        // console.log(this.state.circle.initialPosition);
-        let rippleComponent = this.state.circle.anim.map((val,index)=>{
-            return (
-                <Animated.View key={"animatedView_"+index} style={[styles.spreadCircle,{backgroundColor:this.state.circle.rippleColor},{
-                    opacity:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[1,0]
-                            }),
-                    height:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.circle.initialDiameter,this.state.circle.endDiameter]
-                            }),
-                    width:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.circle.initialDiameter,this.state.circle.endDiameter]
-                            }),
-                    top:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.circle.initialPosition.top - this.state.circle.initialDiameter/2,this.state.circle.initialPosition.top - this.state.circle.initialDiameter/2 - r/2]
-                            }),
-                    left:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.circle.initialPosition.left - this.state.circle.initialDiameter/2,this.state.circle.initialPosition.left - this.state.circle.initialDiameter/2 - r/2]
-                            }),
-                    }]}></Animated.View>
-            )
-        });
-
-    return (
-            
-      <ScrollView style={{flex:1}}>
-
-
-
-        <View style={{
-          flex: 1,
-          flexDirection:'row',
-        }}>
+    return (          
+      <ScrollView style={{flex:1}} scrollEnabled={this.state.scrollEnabled}>
+        <View style={{ flex: 1, flexDirection:'row'}}>
           <TextInput
             style={{
               flex: 1,
@@ -311,134 +274,91 @@ export class HomeScreen extends Component {
           />
         </View>
 
+        <View>{rippleComponent} </View>
 
-
-                        <View>
-                {rippleComponent}
-            </View>
-
-        <View style={{
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-            <TouchableWithoutFeedback 
-          onPressIn={this._startRecognizing.bind(this)} onPressOut={this._stopRecognizing.bind(this)}
-            style={{
-                          // position: 'absolute',
-                          // zIndex: 100,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-            }} >
-              <View style={{
-                                          justifyContent: 'center',
-                                          alignItems: 'center',
-              }}>
-                  <Icon name="microphone" size={70} color="black"
-                  style={{
-                    color: "#99A7F2",
-                    position: 'absolute',
-                    zIndex: 1,
-                }} />
+        <View style={styles.centerContainer}>
+          <TouchableWithoutFeedback 
+            onPressIn={this.startRecognizing.bind(this)} 
+            onPressOut={this.stopRecognizing.bind(this)}
+            style={styles.centerContainer} >
+              <View style={styles.centerContainer}>
+                <View style={[styles.centerContainer, { position: 'absolute', zIndex: 1 }]}>
+                  <RadialMenu
+                    onOpen ={ this.startRecognizing.bind(this) }
+                    onClose={ this.stopRecognizing.bind(this) }
+                    menuRadius={95}
+                    spreadAngle={360}
+                    startAngle={30}
+                    style={styles.centerContainer} 
+                    >
+                      <View style={styles.centerContainer}>
+                        <Icon name="microphone" size={70} color="black" style={{ color: "#99A7F2", position: 'absolute' }} />
+                      </View>
+                      {['添加提醒', '日常记录', '查询记录'].map((name, i) => {
+                        return  (
+                          <View 
+                            style={[styles.centerContainer, { opacity: this.state.menuOpacity }]} 
+                            key={i}
+                            onSelect={() => this.onSelectMenu(name)}
+                            >
+                            <Button
+                              titleStyle={{ fontSize: 15 }}
+                              buttonStyle={{ borderRadius: 200 }}
+                              title={ name } 
+                            />
+                          </View>
+                        );
+                      })}
+                  </RadialMenu>
+                </View>
 
                 <Image
-                ref={view => { this.state.myComponent = view; }}
-
-                style={{
-                  width: 250, 
-                  height: 250,
-                  alignItems: 'center',
-                  justifyContent:'center',
-                }}
-                source={require('../img/ball.png')}
-              />
-
+                  ref={view => { this.state.imageComponent = view; }}
+                  style={[styles.centerContainer, { width: 250, height: 250 }]}
+                  source={require('../img/ball.png')}
+                />
               </View>
-            </TouchableWithoutFeedback>
-                      </View>
+          </TouchableWithoutFeedback>
+        </View>
 
-
-        <View style={{
-          flex: 1
-        }}>
+        <View style={{ flex: 1 }}>
           <Timeline 
             style={styles.list}
             data={this.state.datas}
             circleSize={30}
             circleColor='rgba(0,0,0,0)'
             lineColor='rgb(45,156,219)'
-
-            // timeContainerStyle={{minWidth:52, marginTop: -5}}
-            // timeStyle={{textAlign: 'center', color:'white', padding:5, borderRadius:13}}
-            // descriptionStyle={{color:'gray'}}
-
-            options={{
-              style:{top:-20}
-            }}
-
+            options={{ style:{top:-20} }}
             innerCircle={'icon'}
             onEventPress={this.onEventPress}              
             separator={false}
-
             detailContainerStyle={{
-              // marginBottom: 0, 
               paddingLeft: 5, 
               paddingRight: 5, 
-              // backgroundColor: "red", 
               borderRadius: 0,
-              // paddingTop: 20,
-              // paddingBottom: 20
             }}
-            iconStyle={{
-              // paddingTop: 20,
-              // paddingBottom: 20
-            }}
-            listViewStyle={{
-              // paddingTop: 20
-            }}
-            titleStyle={{
-              // marginTop: -10,
-              paddingBottom: 20
-            }}
+            iconStyle={{}}
+            listViewStyle={{}}
+            titleStyle={{paddingBottom: 20}}
             columnFormat='two-column'
         />
         </View>
-
-   
       </ScrollView>
     );
   };
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-	paddingTop:65,
-    backgroundColor:'white'
-  },
   list: {
     flex: 1,
     marginTop:20,
   },
-  title:{
-    fontSize:16,
-    fontWeight: 'bold'
-  },
-  descriptionContainer:{
-    flexDirection: 'row',
-    paddingRight: 50
-  },
-  image:{
-    width: 50,
-    height: 50,
-    borderRadius: 25
-  },
-  textDescription: {
-    marginLeft: 10,
-    color: 'gray'
-  },
   spreadCircle:{
     borderRadius:999,
     position:'absolute',
-},
+  },
+  centerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
