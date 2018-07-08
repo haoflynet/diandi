@@ -1,141 +1,169 @@
 import React, { Component } from 'react';
 import {
-    View,
-    StyleSheet,
-    Animated,
-    TouchableHighlight,
-    Image,
+  Text,
+  View,
+  StyleSheet
 } from 'react-native';
+import {Agenda} from 'react-native-calendars';
+import XDate from 'xdate';
+import * as WeChat from 'react-native-wechat';
 
-import Dimensions from 'Dimensions';
 
-export class TestScreen extends Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            ripple:2,       //同时存在的圆数量
-            initialDiameter:250,    // 初始直径(最小那个圆的额直径)
-            endDiameter:370,        // 最大圆的直径.TODO: 考虑是否要根据屏幕的最大宽度来改变
-            initialPosition:{top:125,left:180}, // 这是圆的定位，动态调整
-            rippleColor:'#5BC6AD',
-            intervals:500,      //间隔时间
-            spreadSpeed:2000,      //扩散速度
-            component: null,
-        }
+export class TestScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      items: {}
+    };
 
-        let rippleArr = [];
-        for(let i=0;i<this.state.ripple;i++) rippleArr.push(0);
-        this.state.anim = rippleArr.map(()=> new Animated.Value(0))
-        
-        this.cancelAnimated = false;
-        this.animatedFun = null;
-        this.startAnimation();
+    WeChat.registerApp('appid');
 
-        // this.mea.bind(this)
-    }
-    componentDidMount() {
-        // Print component dimensions to console
-        // setTimeout(this.mea.bind(this), 1000);
+    console.log(WeChat.getApiVersion());
+    console.log('=====');
 
-    }
 
-    mea() {
-        console.log('====');
-        console.log(this.state);
+  }
 
-        this.state.myComponent.measure( (fx, fy, width, height, px, py) => {
-            console.log('Component width is: ' + width)
-            console.log('Component height is: ' + height)
-            console.log('X offset to frame: ' + fx)
-            console.log('Y offset to frame: ' + fy)
-            console.log('X offset to page: ' + px)
-            console.log('Y offset to page: ' + py)
-        });
+  render() {
+    return (
+      <Agenda
+        items={this.state.items}
+        loadItemsForMonth={this.loadItems.bind(this)}
+        selected={'2017-05-16'}
+        renderItem={this.renderItem.bind(this)}
+        renderEmptyDate={this.renderEmptyDate.bind(this)}
+        rowHasChanged={this.rowHasChanged.bind(this)}
+        renderDay={(date, item) => {
 
-        console.log(Dimensions.get('window'));
-    }
-    startAnimation(){
-        // 首先获取图片的上下左右直径
-        console.log('once');
+          function sameDate(a, b) {
+            return a instanceof XDate && b instanceof XDate &&
+              a.getFullYear() === b.getFullYear() &&
+              a.getMonth() === b.getMonth() &&
+              a.getDate() === b.getDate();
+          }
 
-        this.state.anim.map((val,index)=>val.setValue(0));
-        this.animatedFun = Animated.stagger(this.state.intervals,this.state.anim.map((val)=>{
-            return Animated.timing(val,{toValue:1,duration:this.state.spreadSpeed})
-        }));
-        this.cancelAnimated = false;
-        this.animatedFun.start(()=>{if(!this.cancelAnimated) {this.startAnimation()}});
-    }
-    stopAnimation(){
-        this.cancelAnimated = true;
-        this.animatedFun.stop();
-        this.state.anim.map((val,index)=>val.setValue(0));
-    }
-    render(){
-        
-        console.log(this.state);
-        let r = this.state.endDiameter-this.state.initialDiameter;    // 直径变化量,top与left的变化是直径的一半
-        let rippleComponent = this.state.anim.map((val,index)=>{
+          const today = sameDate(date, XDate()) ? styles.today : undefined;
+          console.log(date, item);
+          if (date) {
+            if (item) {
+              return (
+                <View style={styles.day}>
+                  <Text allowFontScaling={false} style={[styles.dayNum, today]}>{date.day}</Text>
+                  <Text allowFontScaling={false} style={[styles.dayText, today]}>{XDate.locales[XDate.defaultLocale].dayNamesShort[date.day]}</Text>
+                </View>
+              );
+            }
+
+          } else {
+            // console.log(date, item);
+            // return null;
             return (
-                <Animated.View key={"animatedView_"+index} style={[styles.spreadCircle,{backgroundColor:this.state.rippleColor},{
-                    opacity:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[1,0]
-                            }),
-                    height:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.initialDiameter,this.state.endDiameter]
-                            }),
-                    width:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.initialDiameter,this.state.endDiameter]
-                            }),
-                    top:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.initialPosition.top - this.state.initialDiameter/2,this.state.initialPosition.top - this.state.initialDiameter/2 - r/2]
-                            }),
-                    left:val.interpolate({
-                                inputRange:[0,1],
-                                outputRange:[this.state.initialPosition.left - this.state.initialDiameter/2,this.state.initialPosition.left - this.state.initialDiameter/2 - r/2]
-                            }),
-                    }]}></Animated.View>
-            )
-        })
-        return (
-            <View>
-                            <View>
-                {rippleComponent}
-            </View>
-            <View 
-            style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-            }}
-            >
-              <TouchableHighlight onPressIn={this.startAnimation}>
-                <Image
-                    ref={view => { this.state.myComponent = view; }}
+              <View style={styles.day}/>
+            );
+          }
+        }}
 
-                  style={{
-                    width: 250, 
-                    height: 250,
-                    alignItems: 'center',
-                    justifyContent:'center',
-                  }}
-                  
-                  source={require('../img/ball.png')}
-                />
-              </TouchableHighlight>
-            </View>
+        // markingType={'period'}
+        // markedDates={{
+        //    '2017-05-08': {textColor: '#666'},
+        //    '2017-05-09': {textColor: '#666'},
+        //    '2017-05-14': {startingDay: true, endingDay: true, color: 'blue'},
+        //    '2017-05-21': {startingDay: true, color: 'blue'},
+        //    '2017-05-22': {endingDay: true, color: 'gray'},
+        //    '2017-05-24': {startingDay: true, color: 'gray'},
+        //    '2017-05-25': {color: 'gray'},
+        //    '2017-05-26': {endingDay: true, color: 'gray'}}}
+         // monthFormat={'yyyy'}
+         // theme={{calendarBackground: 'red', agendaKnobColor: 'green'}}
+        //renderDay={(day, item) => (<Text>{day ? day.day: 'item'}</Text>)}
+      />
+    );
+  }
 
+  loadItems(day) {
+    setTimeout(() => {
+      for (let i = -15; i < 85; i++) {
+        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+        const strTime = this.timeToString(time);
+        if (!this.state.items[strTime]) {
+          this.state.items[strTime] = [];
+          const numItems = Math.floor(Math.random() * 5);
+          for (let j = 0; j < numItems; j++) {
+            this.state.items[strTime].push({
+              name: 'Item for ' + strTime,
+              height: Math.max(50, Math.floor(Math.random() * 150))
+            });
+          }
+        }
+      }
+      //console.log(this.state.items);
+      const newItems = {};
+      Object.keys(this.state.items).forEach(key => {newItems[key] = this.state.items[key];});
+      this.setState({
+        items: newItems
+      });
+    }, 1000);
+    // console.log(`Load Items for ${day.year}-${day.month}`);
+  }
 
-            </View>
-        )
-    }
+  renderItem(item) {
+    return (
+      <View style={[styles.item, {height: item.height}]}><Text>{item.name}</Text></View>
+    );
+  }
+
+  renderEmptyDate() {
+    return null;
+    return (
+      <View style={styles.emptyDate}><Text>This is empty date!</Text></View>
+    );
+  }
+
+  rowHasChanged(r1, r2) {
+    return r1.name !== r2.name;
+  }
+
+  timeToString(time) {
+    const date = new Date(time);
+    return date.toISOString().split('T')[0];
+  }
 }
 
 const styles = StyleSheet.create({
-    spreadCircle:{
-        borderRadius:999,
-        position:'absolute',
-    },
-})
+  item: {
+    backgroundColor: 'white',
+    flex: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
+    marginTop: 17
+  },
+  emptyDate: {
+    height: 15,
+    flex:1,
+    paddingTop: 30
+  },
+  day: {
+    width: 63,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginTop: 32
+  },
+  dayNum: {
+    fontSize: 28,
+    fontWeight: '200',
+    color: "#7a92a5"
+  },
+  dayText: {
+    fontSize: 14,
+    fontWeight: '300',
+    color: "#7a92a5",
+    marginTop: -5,
+    backgroundColor: 'rgba(0,0,0,0)'
+  },
+  today: {
+    color: '#00adf5',
+  },
+});
+
+
