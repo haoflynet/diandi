@@ -5,3 +5,7 @@ export const API_RECORDS = API_DOMAIN + '/records/'
 
 export const VOICE_TYPE_ALARM = 'ALARM';
 export const VOICE_TYPE_RECORD = 'RECORD';
+export const VOICE_TYPE_IMG = {
+    'ALARM': '../img/fuzzy_alarm.png',
+    'RECORD': '../img/record.png',
+}
