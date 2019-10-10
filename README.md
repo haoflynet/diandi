@@ -1,9 +1,7 @@
-# diandian
+# 点点记录
 
-## Server
+![](http://oeb6iosux.bkt.clouddn.com/diandian.jpg)
 
-Tornado + xfyun aiui。由于逻辑比较简单，所以view层直接调用model层
+## 微信小程序
 
-## Client
-
-Native-React, using ios native speech recognition.
+使用AIUI打造的智能语音提醒与智能提醒应用。

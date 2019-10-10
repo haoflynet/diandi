@@ -22,9 +22,13 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>weixin</string>
+		<string>wechat</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<!-- TODO: delete-->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>
@@ -36,12 +40,10 @@
 			</dict>
 		</dict>
 	</dict>
-	<!-- 麦克风权限 --> 
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Description of why you require the use of the microphone</string>
-	<!-- 语音识别权限 -->
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>给我个语音识别的权限呗</string>
 	<key>UIAppFonts</key>

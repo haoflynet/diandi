@@ -11,11 +11,13 @@ import { TestScreen } from './views/test';
 
 
 export default App = StackNavigator({
+  Test: {screen: TestScreen},
 
   Home: {screen: HomeScreen},
+
+
   Calendar: {screen: CalendarScreen},
   Profile: {screen: ProfileScreen},
-  Test: {screen: TestScreen},
 
 });
 
